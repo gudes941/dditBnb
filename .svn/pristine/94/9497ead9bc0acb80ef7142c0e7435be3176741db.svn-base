@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="reservation">
+
+	<!-- 위치검색 자동완성 -->
+	<select id="locationReturn" resultClass="prodVo" parameterClass="String">
+		select * from prod where prod_add1 like '%'||#data#||'%'
+	</select>
+	
+	<!-- 숙소 검색 -->
+	<!-- 필요한 파라미터 : 주소(String)[, 체크인 날짜(date), 체크아웃 날짜(date), 인원수(int)] -->
+	<!-- [ ]는 동적쿼리로 구현 -->
+	<select id="searchProd" resultClass="prodVo" parameterClass="map">
+		SELECT *
+		FROM PROD
+		LEFT JOIN SCHEDULE ON PROD.PROD_ID = SCHEDULE.PROD_ID 
+		WHERE PROD_ADD1 LIKE '%제주%'
+		
+		<isNotEmpty property="check_in">
+			AND NOT #check_in# BETWEEN SCHEDULE.CHECK_IN AND SCHEDULE.CHECK_OUT
+		</isNotEmpty>	
+		
+		<isNotEmpty property="check_out">
+			<![CDATA[
+			AND NOT #check_out# >= SCHEDULE.CHECK_IN
+			]]>
+		</isNotEmpty>
+		
+		<isNotEmpty property="person">
+			<![CDATA[
+			AND PROD_PER >= #person#
+			]]>
+		</isNotEmpty>
+		
+	</select>
+	
+</sqlMap>
